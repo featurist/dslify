@@ -56,6 +56,12 @@ describe 'dslify'
             window.foo.bar
         } rewrites as @(_dsl)
             _dsl.window.foo.bar
+    
+    it 'does not bind property literals'
+        @{
+            foo { a = 1, b = 2 }
+        } rewrites as @(_dsl)
+            _dsl.foo { a = 1, b = 2 }
 
     it 'does not overwrite nested function parameters'
         fn (x) =

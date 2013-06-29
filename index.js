@@ -38,7 +38,7 @@
     identifiersUnder = function(node) {
         var visit, visitArray, visitObject, scope, identifiers;
         visit = function(node, scope) {
-            if (!node) {
+            if (!node || node.type === "Property") {
                 return;
             } else {
                 scope = scopeUnder(node, scope);

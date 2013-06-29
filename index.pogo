@@ -25,7 +25,7 @@ rewrite identifiers under (node, dsl name) =
 
 identifiers under (node) =
     visit (node, scope) =
-        if (!node)
+        if (!node || node.type == 'Property')
             return
         else
             scope := scope under (node, scope)
