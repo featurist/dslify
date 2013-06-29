@@ -18,11 +18,17 @@
   "scripts": {
     "test": "pogo -c index.pogo && mocha test/dslify_test.pogo"
   },
-  "repository": "",
+  "repository": {
+      "type": "git",
+      "url": "git://github.com/featurist/dslify.git"
+  },
+  "homepage": "https://github.com/featurist/dslify",
   "keywords": [
     "dsl",
-    "function"
-  ],
+    "function",
+    "rewrite",
+    "transform"
+   ],
   "author": "@joshski",
   "license": "BSD"
 }
