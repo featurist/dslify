@@ -38,6 +38,12 @@ describe 'dslify'
         } rewrites as @(_dsl)
             _dsl.x + _dsl.y
 
+    it 'allows overriding the _dsl argument name'
+        multiply (a, b) = a * b * c
+        transformed = dslify.transform(multiply, dsl name: "xx")
+        expected (xx, a, b) = a * b * xx.c
+        normalise (transformed).should.equal (normalise(expected))
+
     it 'prepends the _dsl argument to any existing arguments'
         @(a, b) @{
             a + b + x

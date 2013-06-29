@@ -3,33 +3,35 @@
     var escodegen, esprima, transform, paramNamesIn, rewriteIdentifiersUnder, identifiersUnder, rewrite, scopeUnder;
     escodegen = require("escodegen");
     esprima = require("esprima");
-    transform = function(func) {
+    transform = function(func, gen1_options) {
+        var dslName;
+        dslName = gen1_options !== void 0 && Object.prototype.hasOwnProperty.call(gen1_options, "dslName") && gen1_options.dslName !== void 0 ? gen1_options.dslName : "_dsl";
         var parsed, funcExpression, params, js;
         parsed = esprima.parse("(" + func.toString() + ")");
-        rewriteIdentifiersUnder(parsed);
+        rewriteIdentifiersUnder(parsed, dslName);
         funcExpression = parsed.body[0].expression;
         params = paramNamesIn(funcExpression);
         js = escodegen.generate(funcExpression.body).replace(/(^\s*\{|\}\s*$)/g, "");
-        return Function.apply(null, [ "_dsl" ].concat(params).concat(js));
+        return Function.apply(null, [ dslName ].concat(params).concat(js));
     };
     exports.transform = transform;
     paramNamesIn = function(funcExpression) {
-        var params, gen1_items, gen2_i, item;
+        var params, gen2_items, gen3_i, item;
         params = [];
-        gen1_items = funcExpression.params;
-        for (gen2_i = 0; gen2_i < gen1_items.length; ++gen2_i) {
-            item = gen1_items[gen2_i];
+        gen2_items = funcExpression.params;
+        for (gen3_i = 0; gen3_i < gen2_items.length; ++gen3_i) {
+            item = gen2_items[gen3_i];
             params.push(item.name);
         }
         return params;
     };
-    rewriteIdentifiersUnder = function(node) {
-        var identifiers, gen3_items, gen4_i, identifier;
+    rewriteIdentifiersUnder = function(node, dslName) {
+        var identifiers, gen4_items, gen5_i, identifier;
         identifiers = identifiersUnder(node);
-        gen3_items = identifiers;
-        for (gen4_i = 0; gen4_i < gen3_items.length; ++gen4_i) {
-            identifier = gen3_items[gen4_i];
-            rewrite(identifier);
+        gen4_items = identifiers;
+        for (gen5_i = 0; gen5_i < gen4_items.length; ++gen5_i) {
+            identifier = gen4_items[gen5_i];
+            rewrite(identifier, dslName);
         }
         return void 0;
     };
@@ -51,19 +53,19 @@
             }
         };
         visitArray = function(node, scope) {
-            var gen5_items, gen6_i, item;
-            gen5_items = node;
-            for (gen6_i = 0; gen6_i < gen5_items.length; ++gen6_i) {
-                item = gen5_items[gen6_i];
+            var gen6_items, gen7_i, item;
+            gen6_items = node;
+            for (gen7_i = 0; gen7_i < gen6_items.length; ++gen7_i) {
+                item = gen6_items[gen7_i];
                 visit(item, scope);
             }
             return void 0;
         };
         visitObject = function(node, scope) {
-            var gen7_items, gen8_i, key;
-            gen7_items = Object.keys(node);
-            for (gen8_i = 0; gen8_i < gen7_items.length; ++gen8_i) {
-                key = gen7_items[gen8_i];
+            var gen8_items, gen9_i, key;
+            gen8_items = Object.keys(node);
+            for (gen9_i = 0; gen9_i < gen8_items.length; ++gen9_i) {
+                key = gen8_items[gen9_i];
                 if (key !== "params" && key !== "property") {
                     visit(node[key], scope);
                 }
@@ -75,7 +77,7 @@
         visit(node, scope);
         return identifiers;
     };
-    rewrite = function(identifier) {
+    rewrite = function(identifier, dslName) {
         var scope;
         scope = identifier._scope;
         delete identifier._scope;
@@ -86,7 +88,7 @@
         identifier.computed = false;
         identifier.object = {
             type: "Identifier",
-            name: "_dsl"
+            name: dslName
         };
         identifier.property = {
             type: "Identifier",
@@ -95,18 +97,18 @@
         return delete identifier.name;
     };
     scopeUnder = function(node, parentScope) {
-        var newScope, gen9_items, gen10_i, key, paramNames, gen11_items, gen12_i, name;
+        var newScope, gen10_items, gen11_i, key, paramNames, gen12_items, gen13_i, name;
         if (node.type === "FunctionExpression") {
             newScope = {};
-            gen9_items = Object.keys(parentScope);
-            for (gen10_i = 0; gen10_i < gen9_items.length; ++gen10_i) {
-                key = gen9_items[gen10_i];
+            gen10_items = Object.keys(parentScope);
+            for (gen11_i = 0; gen11_i < gen10_items.length; ++gen11_i) {
+                key = gen10_items[gen11_i];
                 newScope[key] = parentScope[key];
             }
             paramNames = paramNamesIn(node);
-            gen11_items = paramNames;
-            for (gen12_i = 0; gen12_i < gen11_items.length; ++gen12_i) {
-                name = gen11_items[gen12_i];
+            gen12_items = paramNames;
+            for (gen13_i = 0; gen13_i < gen12_items.length; ++gen13_i) {
+                name = gen12_items[gen13_i];
                 newScope[name] = true;
             }
             return newScope;

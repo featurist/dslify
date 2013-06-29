@@ -1,13 +1,13 @@
 escodegen = require 'escodegen'
 esprima = require 'esprima'
 
-transform (func) =
+transform (func, dsl name: '_dsl') =
     parsed = esprima.parse "(#(func.to string()))"
-    rewrite identifiers under (parsed)
+    rewrite identifiers under (parsed, dsl name)
     func expression = parsed.body.0.expression
     params = param names in (func expression)
     js = escodegen.generate(func expression.body).replace(r/(^\s*\{|\}\s*$)/g, '')
-    Function.apply(null, ['_dsl'].concat(params).concat(js))
+    Function.apply(null, [dsl name].concat(params).concat(js))
 
 exports.transform = transform
 
@@ -18,10 +18,10 @@ param names in (func expression) =
     
     params
 
-rewrite identifiers under (node) =
+rewrite identifiers under (node, dsl name) =
     identifiers = identifiers under (node)
     for each @(identifier) in (identifiers)
-        rewrite (identifier)
+        rewrite (identifier, dsl name)
 
 identifiers under (node) =
     visit (node, scope) =
@@ -51,7 +51,7 @@ identifiers under (node) =
     visit (node, scope)
     identifiers
 
-rewrite (identifier) =
+rewrite (identifier, dsl name) =
     scope = identifier._scope
     delete (identifier._scope)
     
@@ -62,7 +62,7 @@ rewrite (identifier) =
     identifier.computed = false
     identifier.object = {
         type = 'Identifier'
-        name = '_dsl'
+        name = dsl name
     }
     identifier.property = {
         type = 'Identifier'
