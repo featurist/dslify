@@ -1,0 +1,28 @@
+{
+  "name": "dslify",
+  "version": "0.0.1",
+  "description": "Rewrites a function in terms of a DSL",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "escodegen": "~0.0.23",
+    "esprima": "~1.0.3"
+  },
+  "devDependencies": {
+    "mocha": "~1.11.0",
+    "should": "~1.2.2",
+    "pogo": "~0.4.3"
+  },
+  "scripts": {
+    "test": "pogo -c index.pogo && mocha test/dslify_test.pogo"
+  },
+  "repository": "",
+  "keywords": [
+    "dsl",
+    "function"
+  ],
+  "author": "@joshski",
+  "license": "BSD"
+}
