@@ -25,7 +25,7 @@ Rewrites a JavaScript function, such that any global property access is transfor
 dslify parses functions using [esprima](https://github.com/ariya/esprima), rewriting them as new functions using  [escodegen](https://github.com/Constellation/escodegen).
 
 ### Hold on, isn't this just a long-winded JavaScript 'with'?
-Yes. But 'with' is [leaky and dangerous](http://www.yuiblog.com/blog/2006/04/11/with-statement-considered-harmful/), wheras dslify like a sandbox because it rewrites access to global scope, e.g:
+Yes. But 'with' is [leaky and dangerous](http://www.yuiblog.com/blog/2006/04/11/with-statement-considered-harmful/), wheras dslify is like a sandbox because it rewrites access to global scope, e.g:
 
     var dslify = require('dslify');
     
@@ -48,7 +48,7 @@ Yes. But 'with' is [leaky and dangerous](http://www.yuiblog.com/blog/2006/04/11/
     console.log(dsl.z);     // global is safe!
 
 ### Isn't it hard to debug dynamically-generated functions?
-Yes. So depending on how much debugging you do, _runtime_ function rewriting may only be practical with _configuration_ DSLs that are unlikely to generate errors. For bigger DSLs you might consider rewriting functions to disk, as a compilation step in your build process.
+Yes. So depending on how much debugging you do, _runtime_ function rewriting may only be practical with 'configuration' DSLs that are unlikely to generate errors. For bigger DSLs you might consider rewriting functions to disk, as a compilation step in your build process.
 
 ### License
 BSD
