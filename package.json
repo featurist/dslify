@@ -1,14 +1,14 @@
 {
   "name": "dslify",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Rewrites global property access in functions",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "escodegen": "~0.0.23",
-    "esprima": "~1.0.3"
+    "escodegen": "0.0.28",
+    "esprima": "~1.0.4"
   },
   "devDependencies": {
     "mocha": "~1.11.0",
@@ -19,8 +19,8 @@
     "test": "pogo -c index.pogo && mocha test/dslify_test.pogo"
   },
   "repository": {
-      "type": "git",
-      "url": "git://github.com/featurist/dslify.git"
+    "type": "git",
+    "url": "git://github.com/featurist/dslify.git"
   },
   "homepage": "https://github.com/featurist/dslify",
   "keywords": [
@@ -28,7 +28,7 @@
     "function",
     "rewrite",
     "transform"
-   ],
+  ],
   "author": "@joshski",
   "license": "BSD"
 }
