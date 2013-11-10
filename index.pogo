@@ -5,9 +5,11 @@ transform (func, dsl name: '_dsl') =
     parsed = esprima.parse "(#(func.to string()))"
     rewrite identifiers under (parsed, dsl name)
     func expression = parsed.body.0.expression
-    params = param names in (func expression)
+    func expression.params = [
+        { type = 'Identifier', name = dsl name }
+    ].concat(func expression.params)
     js = escodegen.generate(func expression.body).replace(r/(^\s*\{|\}\s*$)/g, '')
-    Function.apply(null, [dsl name].concat(params).concat(js))
+    Function.apply(null, param names in (func expression).concat(js))
 
 exports.transform = transform
 
@@ -15,7 +17,7 @@ param names in (func expression) =
     params = []
     for each @(item) in (func expression.params)
         params.push (item.name)
-    
+
     params
 
 rewrite identifiers under (node, dsl name) =
@@ -29,32 +31,35 @@ identifiers under (node) =
             return
         else
             scope := scope under (node, scope)
-            if (node.type == 'Identifier')
+            if (node.type == 'VariableDeclaration')
+                variables := variables.concat(variable names in (node.declarations))
+            else if ((node.type == 'Identifier') && (variables.index of (node.name) == -1))
                 node._scope = scope
                 identifiers.push(node)
             else if (node :: Array)
                 visit array (node, scope)
             else if (node :: Object)
                 visit object (node, scope)
-    
+
     visit array (node, scope) =
         for each @(item) in (node)
             visit (item, scope)
-    
+
     visit object (node, scope) =
         for each @(key) in (Object.keys(node))
             if ((key != 'params') && (key != 'property'))
-                visit (node.(key), scope)        
-    
+                visit (node.(key), scope)
+
     scope = {}
     identifiers = []
+    variables = []
     visit (node, scope)
     identifiers
 
 rewrite (identifier, dsl name) =
     scope = identifier._scope
     delete (identifier._scope)
-    
+
     if (scope.(identifier.name))
         return
 
@@ -75,11 +80,18 @@ scope under (node, parent scope) =
         new scope = {}
         for each @(key) in (Object.keys(parent scope))
             new scope.(key) = parent scope.(key)
-            
+
         param names = param names in (node)
         for each @(name) in (param names)
             new scope.(name) = true
-        
+
         new scope
     else
         parent scope
+
+variable names in (declarations) =
+    names = []
+    for each @(declaration) in (declarations)
+        names.push(declaration.id.name)
+
+    names

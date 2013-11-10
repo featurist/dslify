@@ -1,18 +1,21 @@
 (function() {
     var self = this;
-    var escodegen, esprima, transform, paramNamesIn, rewriteIdentifiersUnder, identifiersUnder, rewrite, scopeUnder;
+    var escodegen, esprima, transform, paramNamesIn, rewriteIdentifiersUnder, identifiersUnder, rewrite, scopeUnder, variableNamesIn;
     escodegen = require("escodegen");
     esprima = require("esprima");
     transform = function(func, gen1_options) {
         var dslName;
         dslName = gen1_options !== void 0 && Object.prototype.hasOwnProperty.call(gen1_options, "dslName") && gen1_options.dslName !== void 0 ? gen1_options.dslName : "_dsl";
-        var parsed, funcExpression, params, js;
+        var parsed, funcExpression, js;
         parsed = esprima.parse("(" + func.toString() + ")");
         rewriteIdentifiersUnder(parsed, dslName);
         funcExpression = parsed.body[0].expression;
-        params = paramNamesIn(funcExpression);
+        funcExpression.params = [ {
+            type: "Identifier",
+            name: dslName
+        } ].concat(funcExpression.params);
         js = escodegen.generate(funcExpression.body).replace(/(^\s*\{|\}\s*$)/g, "");
-        return Function.apply(null, [ dslName ].concat(params).concat(js));
+        return Function.apply(null, paramNamesIn(funcExpression).concat(js));
     };
     exports.transform = transform;
     paramNamesIn = function(funcExpression) {
@@ -36,13 +39,15 @@
         return void 0;
     };
     identifiersUnder = function(node) {
-        var visit, visitArray, visitObject, scope, identifiers;
+        var visit, visitArray, visitObject, scope, identifiers, variables;
         visit = function(node, scope) {
             if (!node || node.type === "Property") {
                 return;
             } else {
                 scope = scopeUnder(node, scope);
-                if (node.type === "Identifier") {
+                if (node.type === "VariableDeclaration") {
+                    return variables = variables.concat(variableNamesIn(node.declarations));
+                } else if (node.type === "Identifier" && variables.indexOf(node.name) === -1) {
                     node._scope = scope;
                     return identifiers.push(node);
                 } else if (node instanceof Array) {
@@ -74,6 +79,7 @@
         };
         scope = {};
         identifiers = [];
+        variables = [];
         visit(node, scope);
         return identifiers;
     };
@@ -115,5 +121,15 @@
         } else {
             return parentScope;
         }
+    };
+    variableNamesIn = function(declarations) {
+        var names, gen14_items, gen15_i, declaration;
+        names = [];
+        gen14_items = declarations;
+        for (gen15_i = 0; gen15_i < gen14_items.length; ++gen15_i) {
+            declaration = gen14_items[gen15_i];
+            names.push(declaration.id.name);
+        }
+        return names;
     };
 }).call(this);

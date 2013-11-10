@@ -11,24 +11,24 @@ normalise (fn) =
 
 describe 'dslify'
 
-    it 'rewrites a function so global variables become DSL accessors'
+    it 'rewrites a function so that global variables become DSL accessors'
         dsl = {
             scream (word) = "#(word)!!"
             nice word = "unicorns"
         }
         scream it () =
             scream (nice word)
-        
+
         transformed = dslify.transform(scream it)
         transformed(dsl).should.equal "unicorns!!"
-    
+
     it 'preserves any existing function parameters'
         dsl = {
             scream (word1, word2) = "#(word1)!! #(word2)!!"
         }
         scream them (a, b) =
             scream (a, b)
-    
+
         transformed = dslify.transform(scream them)
         transformed(dsl, "lasers", "sharks").should.equal "lasers!! sharks!!"
 
@@ -51,25 +51,33 @@ describe 'dslify'
             a + b + _dsl.x
         }
 
-    it 'does not bind property accessors'
+    it 'preserves property accessors'
         @{
             window.foo.bar
         } rewrites as @(_dsl)
             _dsl.window.foo.bar
-    
-    it 'does not bind property literals'
+
+    it 'preserves property literals'
         @{
             foo { a = 1, b = 2 }
         } rewrites as @(_dsl)
             _dsl.foo { a = 1, b = 2 }
 
-    it 'does not overwrite nested function parameters'
+    it 'preserves variables declared in the outermost scope'
+        @{
+            foo = 1
+            bar { a = foo }
+        } rewrites as @(_dsl)
+            foo = 1
+            _dsl.bar { a = foo }
+
+    it 'preserves nested function parameters'
         fn (x) =
             foo (a, b) @(c, d)
                 x.bar(baz(a, b, c, d))
                 bar (c) @(x)
                     c + x
-        
+
         (fn) rewrites as @(_dsl, x)
             _dsl.foo (_dsl.a, _dsl.b) @(c, d)
                 x.bar(_dsl.baz(_dsl.a, _dsl.b, c, d))
