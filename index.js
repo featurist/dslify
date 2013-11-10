@@ -4,15 +4,20 @@
     escodegen = require("escodegen");
     esprima = require("esprima");
     transform = function(func, gen1_options) {
-        var dslName;
+        var dslName, asString;
         dslName = gen1_options !== void 0 && Object.prototype.hasOwnProperty.call(gen1_options, "dslName") && gen1_options.dslName !== void 0 ? gen1_options.dslName : "_dsl";
+        asString = gen1_options !== void 0 && Object.prototype.hasOwnProperty.call(gen1_options, "asString") && gen1_options.asString !== void 0 ? gen1_options.asString : false;
         var parsed, funcExpression, params, js;
         parsed = esprima.parse("(" + func.toString() + ")");
         rewriteIdentifiersUnder(parsed, dslName);
-        funcExpression = parsed.body[0].expression;
-        params = paramNamesIn(funcExpression);
-        js = escodegen.generate(funcExpression.body).replace(/(^\s*\{|\}\s*$)/g, "");
-        return Function.apply(null, [ dslName ].concat(params).concat(js));
+        if (asString) {
+            return escodegen.generate(parsed);
+        } else {
+            funcExpression = parsed.body[0].expression;
+            params = paramNamesIn(funcExpression);
+            js = escodegen.generate(funcExpression.body).replace(/(^\s*\{|\}\s*$)/g, "");
+            return Function.apply(null, [ dslName ].concat(params).concat(js));
+        }
     };
     exports.transform = transform;
     paramNamesIn = function(funcExpression) {

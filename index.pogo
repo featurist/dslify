@@ -1,13 +1,17 @@
 escodegen = require 'escodegen'
 esprima = require 'esprima'
 
-transform (func, dsl name: '_dsl') =
+transform (func, dsl name: '_dsl', as string: false) =
     parsed = esprima.parse "(#(func.to string()))"
     rewrite identifiers under (parsed, dsl name)
-    func expression = parsed.body.0.expression
-    params = param names in (func expression)
-    js = escodegen.generate(func expression.body).replace(r/(^\s*\{|\}\s*$)/g, '')
-    Function.apply(null, [dsl name].concat(params).concat(js))
+
+    if (as string)
+        escodegen.generate(parsed)
+    else
+        func expression = parsed.body.0.expression
+        params = param names in (func expression)
+        js = escodegen.generate(func expression.body).replace(r/(^\s*\{|\}\s*$)/g, '')
+        Function.apply(null, [dsl name].concat(params).concat(js))
 
 exports.transform = transform
 
@@ -15,7 +19,7 @@ param names in (func expression) =
     params = []
     for each @(item) in (func expression.params)
         params.push (item.name)
-    
+
     params
 
 rewrite identifiers under (node, dsl name) =
@@ -36,16 +40,16 @@ identifiers under (node) =
                 visit array (node, scope)
             else if (node :: Object)
                 visit object (node, scope)
-    
+
     visit array (node, scope) =
         for each @(item) in (node)
             visit (item, scope)
-    
+
     visit object (node, scope) =
         for each @(key) in (Object.keys(node))
             if ((key != 'params') && (key != 'property'))
-                visit (node.(key), scope)        
-    
+                visit (node.(key), scope)
+
     scope = {}
     identifiers = []
     visit (node, scope)
@@ -54,7 +58,7 @@ identifiers under (node) =
 rewrite (identifier, dsl name) =
     scope = identifier._scope
     delete (identifier._scope)
-    
+
     if (scope.(identifier.name))
         return
 
@@ -75,11 +79,11 @@ scope under (node, parent scope) =
         new scope = {}
         for each @(key) in (Object.keys(parent scope))
             new scope.(key) = parent scope.(key)
-            
+
         param names = param names in (node)
         for each @(name) in (param names)
             new scope.(name) = true
-        
+
         new scope
     else
         parent scope

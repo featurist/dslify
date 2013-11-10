@@ -18,17 +18,26 @@ describe 'dslify'
         }
         scream it () =
             scream (nice word)
-        
+
         transformed = dslify.transform(scream it)
         transformed(dsl).should.equal "unicorns!!"
-    
+
+    it 'takes and returns JavaScript strings'
+        scream it (nice word) =
+            scream (nice word, global value)
+
+        scream it string = scream it.to string()
+
+        transformed = dslify.transform(scream it string, as string: true)
+        transformed.should.be.a String
+
     it 'preserves any existing function parameters'
         dsl = {
             scream (word1, word2) = "#(word1)!! #(word2)!!"
         }
         scream them (a, b) =
             scream (a, b)
-    
+
         transformed = dslify.transform(scream them)
         transformed(dsl, "lasers", "sharks").should.equal "lasers!! sharks!!"
 
@@ -56,7 +65,7 @@ describe 'dslify'
             window.foo.bar
         } rewrites as @(_dsl)
             _dsl.window.foo.bar
-    
+
     it 'does not bind property literals'
         @{
             foo { a = 1, b = 2 }
@@ -69,7 +78,7 @@ describe 'dslify'
                 x.bar(baz(a, b, c, d))
                 bar (c) @(x)
                     c + x
-        
+
         (fn) rewrites as @(_dsl, x)
             _dsl.foo (_dsl.a, _dsl.b) @(c, d)
                 x.bar(_dsl.baz(_dsl.a, _dsl.b, c, d))
