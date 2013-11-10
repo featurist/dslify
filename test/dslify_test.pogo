@@ -71,6 +71,16 @@ describe 'dslify'
             foo = 1
             _dsl.bar { a = foo }
 
+    it 'preserves variables declared in nested scopes'
+        @{
+            foo
+                bar = 1
+                { a = bar }
+        } rewrites as @(_dsl)
+            _dsl.foo
+                bar = 1
+                { a = bar }
+
     it 'preserves nested function parameters'
         fn (x) =
             foo (a, b) @(c, d)
