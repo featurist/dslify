@@ -10,20 +10,17 @@ Rewrites a JavaScript function, such that any global property access is transfor
 
     var dslify = require('dslify');
 
-    var fn = function() { return shout(word); };
-    var shouter = dslify.transform(fn);
+    var leaky = function() { return say(word); };
+    var shout = dslify.transform(leaky);
+
+    console.log(shout.toString())
+    //-> function anonymous(_dsl) { return _dsl.say(_dsl.word); }
 
     var dsl = {
-        shout: function(something) {
-            return something + "!!";
-        },
+        say: function(it) { return it + "!!"; },
         word: "unicorns"
     };
-
-    console.log(shouter.toString())
-    //-> function anonymous(_dsl) { return _dsl.shout(_dsl.word); }
-
-    console.log(shouter(dsl));
+    console.log(shout(dsl));
     //-> unicorns!!
 
 ### How?
