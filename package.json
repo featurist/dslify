@@ -1,7 +1,7 @@
 {
   "name": "dslify",
   "version": "0.0.2",
-  "description": "Rewrites a function in terms of a DSL",
+  "description": "Rewrites global property access in functions",
   "main": "index.js",
   "directories": {
     "test": "test"
