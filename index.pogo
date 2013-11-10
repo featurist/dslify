@@ -6,7 +6,7 @@ transform (func, dsl name: '_dsl', as string: false) =
     rewrite identifiers under (parsed, dsl name)
 
     if (as string)
-        escodegen.generate(parsed)
+        escodegen.generate(parsed).replace(r/(^\s*\(|\);\s*$)/g, '')
     else
         func expression = parsed.body.0.expression
         params = param names in (func expression)

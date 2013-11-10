@@ -11,7 +11,7 @@
         parsed = esprima.parse("(" + func.toString() + ")");
         rewriteIdentifiersUnder(parsed, dslName);
         if (asString) {
-            return escodegen.generate(parsed);
+            return escodegen.generate(parsed).replace(/(^\s*\(|\);\s*$)/g, "");
         } else {
             funcExpression = parsed.body[0].expression;
             params = paramNamesIn(funcExpression);
