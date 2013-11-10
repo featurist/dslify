@@ -19,7 +19,12 @@ Rewrites a JavaScript function, such that any global property access is transfor
         },
         word: "unicorns"
     };
-    shouter(dsl); // unicorns!!
+
+    console.log(shouter.toString())
+    //-> function anonymous(_dsl) { return _dsl.shout(_dsl.word); }
+
+    console.log(shouter(dsl));
+    //-> unicorns!!
 
 ### How?
 dslify parses functions using [esprima](https://github.com/ariya/esprima), rewriting them as new functions using  [escodegen](https://github.com/Constellation/escodegen).
