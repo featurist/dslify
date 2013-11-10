@@ -46,7 +46,7 @@ identifiers under (node) =
             visit (item, scope)
 
     visit object (node, scope) =
-        for each @(key) in (Object.keys(node))
+        for @(key) in (node)
             if ((key != 'params') && (key != 'property'))
                 visit (node.(key), scope)
 

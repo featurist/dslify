@@ -67,13 +67,13 @@
             return void 0;
         };
         visitObject = function(node, scope) {
-            var gen8_items, gen9_i, key;
-            gen8_items = Object.keys(node);
-            for (gen9_i = 0; gen9_i < gen8_items.length; ++gen9_i) {
-                key = gen8_items[gen9_i];
-                if (key !== "params" && key !== "property") {
-                    visit(node[key], scope);
-                }
+            var key;
+            for (key in node) {
+                (function(key) {
+                    if (key !== "params" && key !== "property") {
+                        visit(node[key], scope);
+                    }
+                })(key);
             }
             return void 0;
         };
@@ -103,18 +103,18 @@
         return delete identifier.name;
     };
     scopeUnder = function(node, parentScope) {
-        var newScope, gen10_items, gen11_i, key, paramNames, gen12_items, gen13_i, name;
+        var newScope, gen8_items, gen9_i, key, paramNames, gen10_items, gen11_i, name;
         if (node.type === "FunctionExpression") {
             newScope = {};
-            gen10_items = Object.keys(parentScope);
-            for (gen11_i = 0; gen11_i < gen10_items.length; ++gen11_i) {
-                key = gen10_items[gen11_i];
+            gen8_items = Object.keys(parentScope);
+            for (gen9_i = 0; gen9_i < gen8_items.length; ++gen9_i) {
+                key = gen8_items[gen9_i];
                 newScope[key] = parentScope[key];
             }
             paramNames = paramNamesIn(node);
-            gen12_items = paramNames;
-            for (gen13_i = 0; gen13_i < gen12_items.length; ++gen13_i) {
-                name = gen12_items[gen13_i];
+            gen10_items = paramNames;
+            for (gen11_i = 0; gen11_i < gen10_items.length; ++gen11_i) {
+                name = gen10_items[gen11_i];
                 newScope[name] = true;
             }
             return newScope;
@@ -123,11 +123,11 @@
         }
     };
     variableNamesIn = function(declarations) {
-        var names, gen14_items, gen15_i, declaration;
+        var names, gen12_items, gen13_i, declaration;
         names = [];
-        gen14_items = declarations;
-        for (gen15_i = 0; gen15_i < gen14_items.length; ++gen15_i) {
-            declaration = gen14_items[gen15_i];
+        gen12_items = declarations;
+        for (gen13_i = 0; gen13_i < gen12_items.length; ++gen13_i) {
+            declaration = gen12_items[gen13_i];
             names.push(declaration.id.name);
         }
         return names;
