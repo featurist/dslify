@@ -7,13 +7,13 @@
     "test": "test"
   },
   "dependencies": {
-    "escodegen": "~0.0.23",
+    "escodegen": "~0.0.28",
     "esprima": "~1.0.4"
   },
   "devDependencies": {
-    "mocha": "~1.11.0",
-    "should": "~1.2.2",
-    "pogo": "~0.4.3"
+    "mocha": "~1.14.0",
+    "should": "~2.0.2",
+    "pogo": "~0.4.5"
   },
   "scripts": {
     "test": "pogo -c index.pogo && mocha test/dslify_test.pogo"
