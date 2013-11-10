@@ -6,7 +6,7 @@
     transform = function(func, gen1_options) {
         var dslName;
         dslName = gen1_options !== void 0 && Object.prototype.hasOwnProperty.call(gen1_options, "dslName") && gen1_options.dslName !== void 0 ? gen1_options.dslName : "_dsl";
-        var parsed, funcExpression, js;
+        var parsed, funcExpression, js, params;
         parsed = esprima.parse("(" + func.toString() + ")");
         rewriteIdentifiersUnder(parsed, dslName);
         funcExpression = parsed.body[0].expression;
@@ -15,53 +15,59 @@
             name: dslName
         } ].concat(funcExpression.params);
         js = escodegen.generate(funcExpression.body).replace(/(^\s*\{|\}\s*$)/g, "");
-        return Function.apply(null, paramNamesIn(funcExpression).concat(js));
+        params = paramNamesIn(funcExpression);
+        return Function.apply(null, params.concat(js));
     };
     exports.transform = transform;
     paramNamesIn = function(funcExpression) {
-        var params, gen2_items, gen3_i, item;
-        params = [];
-        gen2_items = funcExpression.params;
-        for (gen3_i = 0; gen3_i < gen2_items.length; ++gen3_i) {
-            item = gen2_items[gen3_i];
-            params.push(item.name);
-        }
-        return params;
+        return function() {
+            var gen2_results, gen3_items, gen4_i, p;
+            gen2_results = [];
+            gen3_items = funcExpression.params;
+            for (gen4_i = 0; gen4_i < gen3_items.length; ++gen4_i) {
+                p = gen3_items[gen4_i];
+                gen2_results.push(p.name);
+            }
+            return gen2_results;
+        }();
     };
     rewriteIdentifiersUnder = function(node, dslName) {
-        var identifiers, gen4_items, gen5_i, identifier;
+        var identifiers, gen5_items, gen6_i, identifier;
         identifiers = identifiersUnder(node);
-        gen4_items = identifiers;
-        for (gen5_i = 0; gen5_i < gen4_items.length; ++gen5_i) {
-            identifier = gen4_items[gen5_i];
+        gen5_items = identifiers;
+        for (gen6_i = 0; gen6_i < gen5_items.length; ++gen6_i) {
+            identifier = gen5_items[gen6_i];
             rewrite(identifier, dslName);
         }
         return void 0;
     };
     identifiersUnder = function(node) {
-        var visit, visitArray, visitObject, scope, identifiers, variables;
+        var visit, descend, visitArray, visitObject, scope, identifiers, variables;
         visit = function(node, scope) {
             if (!node || node.type === "Property") {
                 return;
             } else {
-                scope = scopeUnder(node, scope);
-                if (node.type === "VariableDeclaration") {
-                    return variables = variables.concat(variableNamesIn(node.declarations));
-                } else if (node.type === "Identifier" && variables.indexOf(node.name) === -1) {
-                    node._scope = scope;
-                    return identifiers.push(node);
-                } else if (node instanceof Array) {
-                    return visitArray(node, scope);
-                } else if (node instanceof Object) {
-                    return visitObject(node, scope);
-                }
+                return descend(node, scope);
+            }
+        };
+        descend = function(node, scope) {
+            scope = scopeUnder(node, scope);
+            if (node.type === "VariableDeclaration") {
+                return variables = variables.concat(variableNamesIn(node.declarations));
+            } else if (node.type === "Identifier" && variables.indexOf(node.name) === -1) {
+                node._scope = scope;
+                return identifiers.push(node);
+            } else if (node instanceof Array) {
+                return visitArray(node, scope);
+            } else if (node instanceof Object) {
+                return visitObject(node, scope);
             }
         };
         visitArray = function(node, scope) {
-            var gen6_items, gen7_i, item;
-            gen6_items = node;
-            for (gen7_i = 0; gen7_i < gen6_items.length; ++gen7_i) {
-                item = gen6_items[gen7_i];
+            var gen7_items, gen8_i, item;
+            gen7_items = node;
+            for (gen8_i = 0; gen8_i < gen7_items.length; ++gen8_i) {
+                item = gen7_items[gen8_i];
                 visit(item, scope);
             }
             return void 0;
@@ -103,18 +109,18 @@
         return delete identifier.name;
     };
     scopeUnder = function(node, parentScope) {
-        var newScope, gen8_items, gen9_i, key, paramNames, gen10_items, gen11_i, name;
+        var newScope, gen9_items, gen10_i, key, paramNames, gen11_items, gen12_i, name;
         if (node.type === "FunctionExpression") {
             newScope = {};
-            gen8_items = Object.keys(parentScope);
-            for (gen9_i = 0; gen9_i < gen8_items.length; ++gen9_i) {
-                key = gen8_items[gen9_i];
+            gen9_items = Object.keys(parentScope);
+            for (gen10_i = 0; gen10_i < gen9_items.length; ++gen10_i) {
+                key = gen9_items[gen10_i];
                 newScope[key] = parentScope[key];
             }
             paramNames = paramNamesIn(node);
-            gen10_items = paramNames;
-            for (gen11_i = 0; gen11_i < gen10_items.length; ++gen11_i) {
-                name = gen10_items[gen11_i];
+            gen11_items = paramNames;
+            for (gen12_i = 0; gen12_i < gen11_items.length; ++gen12_i) {
+                name = gen11_items[gen12_i];
                 newScope[name] = true;
             }
             return newScope;
@@ -123,13 +129,15 @@
         }
     };
     variableNamesIn = function(declarations) {
-        var names, gen12_items, gen13_i, declaration;
-        names = [];
-        gen12_items = declarations;
-        for (gen13_i = 0; gen13_i < gen12_items.length; ++gen13_i) {
-            declaration = gen12_items[gen13_i];
-            names.push(declaration.id.name);
-        }
-        return names;
+        return function() {
+            var gen13_results, gen14_items, gen15_i, d;
+            gen13_results = [];
+            gen14_items = declarations;
+            for (gen15_i = 0; gen15_i < gen14_items.length; ++gen15_i) {
+                d = gen14_items[gen15_i];
+                gen13_results.push(d.id.name);
+            }
+            return gen13_results;
+        }();
     };
 }).call(this);

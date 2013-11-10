@@ -9,16 +9,13 @@ transform (func, dsl name: '_dsl') =
         { type = 'Identifier', name = dsl name }
     ].concat(func expression.params)
     js = escodegen.generate(func expression.body).replace(r/(^\s*\{|\}\s*$)/g, '')
-    Function.apply(null, param names in (func expression).concat(js))
+    params = param names in (func expression)
+    Function.apply(null, params.concat(js))
 
 exports.transform = transform
 
 param names in (func expression) =
-    params = []
-    for each @(item) in (func expression.params)
-        params.push (item.name)
-
-    params
+    [p.name, where: p <- func expression.params]
 
 rewrite identifiers under (node, dsl name) =
     identifiers = identifiers under (node)
@@ -30,16 +27,19 @@ identifiers under (node) =
         if (!node || node.type == 'Property')
             return
         else
-            scope := scope under (node, scope)
-            if (node.type == 'VariableDeclaration')
-                variables := variables.concat(variable names in (node.declarations))
-            else if ((node.type == 'Identifier') && (variables.index of (node.name) == -1))
-                node._scope = scope
-                identifiers.push(node)
-            else if (node :: Array)
-                visit array (node, scope)
-            else if (node :: Object)
-                visit object (node, scope)
+            descend (node, scope)
+
+    descend (node, scope) =
+        scope := scope under (node, scope)
+        if (node.type == 'VariableDeclaration')
+            variables := variables.concat(variable names in (node.declarations))
+        else if ((node.type == 'Identifier') && (variables.index of (node.name) == -1))
+            node._scope = scope
+            identifiers.push(node)
+        else if (node :: Array)
+            visit array (node, scope)
+        else if (node :: Object)
+            visit object (node, scope)
 
     visit array (node, scope) =
         for each @(item) in (node)
@@ -90,8 +90,4 @@ scope under (node, parent scope) =
         parent scope
 
 variable names in (declarations) =
-    names = []
-    for each @(declaration) in (declarations)
-        names.push(declaration.id.name)
-
-    names
+    [d.id.name, where: d <- declarations]
