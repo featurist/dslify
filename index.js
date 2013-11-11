@@ -1,6 +1,6 @@
 (function() {
     var self = this;
-    var escodegen, esprima, transform, paramNamesIn, rewriteIdentifiersUnder, identifiersUnder, rewrite, scopeUnder;
+    var escodegen, esprima, transform, paramNamesIn, rewriteIdentifiersUnder, identifiersUnder, rewrite, addFunctionArguments;
     escodegen = require("escodegen");
     esprima = require("esprima");
     transform = function(func, gen1_options) {
@@ -43,11 +43,13 @@
     identifiersUnder = function(node) {
         var visit, visitArray, visitObject, scope, identifiers;
         visit = function(node, scope) {
-            if (!node || node.type === "Property") {
+            if (!node || node.type === "Property" || node === "VariableDeclaration") {
                 return;
             } else {
-                scope = scopeUnder(node, scope);
-                if (node.type === "Identifier") {
+                addFunctionArguments(node, scope);
+                if (node.type === "VariableDeclarator") {
+                    return scope[node.id.name] = true;
+                } else if (node.type === "Identifier") {
                     node._scope = scope;
                     return identifiers.push(node);
                 } else if (node instanceof Array) {
@@ -101,24 +103,16 @@
         };
         return delete identifier.name;
     };
-    scopeUnder = function(node, parentScope) {
-        var newScope, gen10_items, gen11_i, key, paramNames, gen12_items, gen13_i, name;
+    addFunctionArguments = function(node, parentScope) {
+        var paramNames, gen10_items, gen11_i, name;
         if (node.type === "FunctionExpression") {
-            newScope = {};
-            gen10_items = Object.keys(parentScope);
-            for (gen11_i = 0; gen11_i < gen10_items.length; ++gen11_i) {
-                key = gen10_items[gen11_i];
-                newScope[key] = parentScope[key];
-            }
             paramNames = paramNamesIn(node);
-            gen12_items = paramNames;
-            for (gen13_i = 0; gen13_i < gen12_items.length; ++gen13_i) {
-                name = gen12_items[gen13_i];
-                newScope[name] = true;
+            gen10_items = paramNames;
+            for (gen11_i = 0; gen11_i < gen10_items.length; ++gen11_i) {
+                name = gen10_items[gen11_i];
+                parentScope[name] = true;
             }
-            return newScope;
-        } else {
-            return parentScope;
+            return void 0;
         }
     };
 }).call(this);

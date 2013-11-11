@@ -31,6 +31,18 @@ describe 'dslify'
         transformed = dslify.transform(scream it string, as string: true)
         transformed.should.be.a String
 
+    it 'does not rewrite local variables'
+        scream it (nice word) =
+            opts = 123
+            scream (opts, nice word, global value)
+
+        scream it string = scream it.to string()
+
+        transformed = dslify.transform(scream it string, as string: true)
+        transformed.should.not.match(r/var ;/g)
+        transformed.should.not.match(r/_dsl.opts/g)
+        transformed.should.not.match(r/_dsl.niceWord/g)
+
     it 'preserves any existing function parameters'
         dsl = {
             scream (word1, word2) = "#(word1)!! #(word2)!!"

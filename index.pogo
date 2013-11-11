@@ -29,11 +29,14 @@ rewrite identifiers under (node, dsl name) =
 
 identifiers under (node) =
     visit (node, scope) =
-        if (!node || node.type == 'Property')
+        if (!node || node.type == 'Property' || node == 'VariableDeclaration')
             return
         else
-            scope := scope under (node, scope)
-            if (node.type == 'Identifier')
+            add function arguments(node, scope)
+
+            if (node.type == 'VariableDeclarator')
+                scope.(node.id.name) = true
+            else if (node.type == 'Identifier')
                 node._scope = scope
                 identifiers.push(node)
             else if (node :: Array)
@@ -74,16 +77,8 @@ rewrite (identifier, dsl name) =
     }
     delete (identifier.name)
 
-scope under (node, parent scope) =
+add function arguments (node, parent scope) =
     if (node.type == 'FunctionExpression')
-        new scope = {}
-        for each @(key) in (Object.keys(parent scope))
-            new scope.(key) = parent scope.(key)
-
         param names = param names in (node)
         for each @(name) in (param names)
-            new scope.(name) = true
-
-        new scope
-    else
-        parent scope
+            parent scope.(name) = true

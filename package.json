@@ -1,6 +1,6 @@
 {
   "name": "dslify",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Rewrites a function in terms of a DSL",
   "main": "index.js",
   "directories": {
@@ -27,8 +27,15 @@
     "dsl",
     "function",
     "rewrite",
-    "transform"
+    "transform",
+    "sandbox"
   ],
   "author": "@joshski",
+  "contributors": [
+    {
+      "name": "Alex Gorbatchev",
+      "url": "https://github.com/alexgorbatchev"
+    }
+  ],
   "license": "BSD"
 }
