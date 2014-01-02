@@ -16,7 +16,7 @@
     "pogo": "~0.4.5"
   },
   "scripts": {
-    "test": "pogo -c index.pogo && mocha test/dslify_test.pogo"
+    "test": "make test"
   },
   "repository": {
     "type": "git",

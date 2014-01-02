@@ -2,6 +2,8 @@
 
 Rewrites a JavaScript function, such that any global property access is transformed to call a member of a new _dsl_ argument. Use dslify to interpret domain-specific languages without messing about in global scope.
 
+[![Build Status](https://secure.travis-ci.org/featurist/dslify.png?branch=master)](http://travis-ci.org/featurist/dslify)
+
 [![Dependency status](https://david-dm.org/featurist/dslify.png)](https://david-dm.org/featurist/dslify)
 
 ### Install
