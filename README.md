@@ -18,11 +18,12 @@ Rewrites a JavaScript function, such that any global property access is transfor
     var shouter = dslify.transform(fn);
 
     var dsl = {
-        say: function(it) { return it + "!!"; },
+        shout: function(something) {
+            return something + "!!";
+        },
         word: "unicorns"
     };
-    console.log(shout(dsl));
-    //-> unicorns!!
+    shouter(dsl); // unicorns!!
 
 ### Strings Example
 
