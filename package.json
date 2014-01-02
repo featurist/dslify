@@ -1,6 +1,6 @@
 {
   "name": "dslify",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Rewrites a function in terms of a DSL",
   "main": "index.js",
   "directories": {
