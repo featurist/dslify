@@ -7,13 +7,13 @@
     "test": "test"
   },
   "dependencies": {
-    "escodegen": "~0.0.28",
+    "escodegen": "~1.0.1",
     "esprima": "~1.0.4"
   },
   "devDependencies": {
-    "mocha": "~1.14.0",
-    "should": "~2.0.2",
-    "pogo": "~0.4.5"
+    "mocha": "~1.16.2",
+    "should": "~2.1.1",
+    "pogo": "~0.6.4"
   },
   "scripts": {
     "test": "make test"
