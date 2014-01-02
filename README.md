@@ -2,6 +2,8 @@
 
 Rewrites a JavaScript function, such that any global property access is transformed to call a member of a new _dsl_ argument. Use dslify to interpret domain-specific languages without messing about in global scope.
 
+[![Dependency status](https://david-dm.org/featurist/dslify.png)](https://david-dm.org/featurist/dslify)
+
 ### Install
 
     npm install dslify
@@ -10,11 +12,8 @@ Rewrites a JavaScript function, such that any global property access is transfor
 
     var dslify = require('dslify');
 
-    var leaky = function() { return say(word); };
-    var shout = dslify.transform(leaky);
-
-    console.log(shout.toString())
-    //-> function anonymous(_dsl) { return _dsl.say(_dsl.word); }
+    var fn = function() { return shout(word); };
+    var shouter = dslify.transform(fn);
 
     var dsl = {
         say: function(it) { return it + "!!"; },
@@ -22,6 +21,18 @@ Rewrites a JavaScript function, such that any global property access is transfor
     };
     console.log(shout(dsl));
     //-> unicorns!!
+
+### Strings Example
+
+Sometimes you might want to operate with strings instead of JavaScript functions. For
+example if you are generating templates or want to send JavaScript to the client.
+
+    var dslify = require('dslify');
+
+    var input = "function(input) { return shout(input, globalValue); };";
+    var output = dslify.transform(input, {asString: true});
+
+    output // function(input) { return shout(input, _dsl.globalValue); };
 
 ### How?
 dslify parses functions using [esprima](https://github.com/ariya/esprima), rewriting them as new functions using  [escodegen](https://github.com/Constellation/escodegen).

@@ -1,22 +1,23 @@
 (function() {
     var self = this;
-    var escodegen, esprima, transform, paramNamesIn, rewriteIdentifiersUnder, identifiersUnder, rewrite, scopeUnder, variableNamesIn;
+    var escodegen, esprima, transform, paramNamesIn, rewriteIdentifiersUnder, identifiersUnder, rewrite, addFunctionArguments;
     escodegen = require("escodegen");
     esprima = require("esprima");
     transform = function(func, gen1_options) {
-        var dslName;
+        var dslName, asString;
         dslName = gen1_options !== void 0 && Object.prototype.hasOwnProperty.call(gen1_options, "dslName") && gen1_options.dslName !== void 0 ? gen1_options.dslName : "_dsl";
-        var parsed, funcExpression, js, params;
+        asString = gen1_options !== void 0 && Object.prototype.hasOwnProperty.call(gen1_options, "asString") && gen1_options.asString !== void 0 ? gen1_options.asString : false;
+        var parsed, funcExpression, params, js;
         parsed = esprima.parse("(" + func.toString() + ")");
         rewriteIdentifiersUnder(parsed, dslName);
-        funcExpression = parsed.body[0].expression;
-        funcExpression.params = [ {
-            type: "Identifier",
-            name: dslName
-        } ].concat(funcExpression.params);
-        js = escodegen.generate(funcExpression.body).replace(/(^\s*\{|\}\s*$)/g, "");
-        params = paramNamesIn(funcExpression);
-        return Function.apply(null, params.concat(js));
+        if (asString) {
+            return escodegen.generate(parsed).replace(/(^\s*\(|\);\s*$)/g, "");
+        } else {
+            funcExpression = parsed.body[0].expression;
+            params = paramNamesIn(funcExpression);
+            js = escodegen.generate(funcExpression.body).replace(/(^\s*\{|\}\s*$)/g, "");
+            return Function.apply(null, [ dslName ].concat(params).concat(js));
+        }
     };
     exports.transform = transform;
     paramNamesIn = function(funcExpression) {
@@ -42,25 +43,22 @@
         return void 0;
     };
     identifiersUnder = function(node) {
-        var visit, descend, visitArray, visitObject, scope, identifiers, variables;
+        var visit, visitArray, visitObject, scope, identifiers, variables;
         visit = function(node, scope) {
-            if (!node || node.type === "Property") {
+            if (!node || node.type === "Property" || node === "VariableDeclaration") {
                 return;
             } else {
-                return descend(node, scope);
-            }
-        };
-        descend = function(node, scope) {
-            scope = scopeUnder(node, scope);
-            if (node.type === "VariableDeclaration") {
-                return variables = variables.concat(variableNamesIn(node.declarations));
-            } else if (node.type === "Identifier" && variables.indexOf(node.name) === -1) {
-                node._scope = scope;
-                return identifiers.push(node);
-            } else if (node instanceof Array) {
-                return visitArray(node, scope);
-            } else if (node instanceof Object) {
-                return visitObject(node, scope);
+                addFunctionArguments(node, scope);
+                if (node.type === "VariableDeclarator") {
+                    return scope[node.id.name] = true;
+                } else if (node.type === "Identifier") {
+                    node._scope = scope;
+                    return identifiers.push(node);
+                } else if (node instanceof Array) {
+                    return visitArray(node, scope);
+                } else if (node instanceof Object) {
+                    return visitObject(node, scope);
+                }
             }
         };
         visitArray = function(node, scope) {
@@ -108,36 +106,16 @@
         };
         return delete identifier.name;
     };
-    scopeUnder = function(node, parentScope) {
-        var newScope, gen9_items, gen10_i, key, paramNames, gen11_items, gen12_i, name;
+    addFunctionArguments = function(node, parentScope) {
+        var paramNames, gen9_items, gen10_i, name;
         if (node.type === "FunctionExpression") {
-            newScope = {};
-            gen9_items = Object.keys(parentScope);
-            for (gen10_i = 0; gen10_i < gen9_items.length; ++gen10_i) {
-                key = gen9_items[gen10_i];
-                newScope[key] = parentScope[key];
-            }
             paramNames = paramNamesIn(node);
-            gen11_items = paramNames;
-            for (gen12_i = 0; gen12_i < gen11_items.length; ++gen12_i) {
-                name = gen11_items[gen12_i];
-                newScope[name] = true;
+            gen9_items = paramNames;
+            for (gen10_i = 0; gen10_i < gen9_items.length; ++gen10_i) {
+                name = gen9_items[gen10_i];
+                parentScope[name] = true;
             }
-            return newScope;
-        } else {
-            return parentScope;
+            return void 0;
         }
-    };
-    variableNamesIn = function(declarations) {
-        return function() {
-            var gen13_results, gen14_items, gen15_i, d;
-            gen13_results = [];
-            gen14_items = declarations;
-            for (gen15_i = 0; gen15_i < gen14_items.length; ++gen15_i) {
-                d = gen14_items[gen15_i];
-                gen13_results.push(d.id.name);
-            }
-            return gen13_results;
-        }();
     };
 }).call(this);

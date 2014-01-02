@@ -1,16 +1,16 @@
 escodegen = require 'escodegen'
 esprima = require 'esprima'
 
-transform (func, dsl name: '_dsl') =
+transform (func, dsl name: '_dsl', as string: false) =
     parsed = esprima.parse "(#(func.to string()))"
     rewrite identifiers under (parsed, dsl name)
-    func expression = parsed.body.0.expression
-    func expression.params = [
-        { type = 'Identifier', name = dsl name }
-    ].concat(func expression.params)
-    js = escodegen.generate(func expression.body).replace(r/(^\s*\{|\}\s*$)/g, '')
-    params = param names in (func expression)
-    Function.apply(null, params.concat(js))
+    if (as string)
+        escodegen.generate(parsed).replace(r/(^\s*\(|\);\s*$)/g, '')
+    else
+        func expression = parsed.body.0.expression
+        params = param names in (func expression)
+        js = escodegen.generate(func expression.body).replace(r/(^\s*\{|\}\s*$)/g, '')
+        Function.apply(null, [dsl name].concat(params).concat(js))
 
 exports.transform = transform
 
@@ -24,22 +24,20 @@ rewrite identifiers under (node, dsl name) =
 
 identifiers under (node) =
     visit (node, scope) =
-        if (!node || node.type == 'Property')
+        if (!node || node.type == 'Property' || node == 'VariableDeclaration')
             return
         else
-            descend (node, scope)
+            add function arguments(node, scope)
 
-    descend (node, scope) =
-        scope := scope under (node, scope)
-        if (node.type == 'VariableDeclaration')
-            variables := variables.concat(variable names in (node.declarations))
-        else if ((node.type == 'Identifier') && (variables.index of (node.name) == -1))
-            node._scope = scope
-            identifiers.push(node)
-        else if (node :: Array)
-            visit array (node, scope)
-        else if (node :: Object)
-            visit object (node, scope)
+            if (node.type == 'VariableDeclarator')
+                scope.(node.id.name) = true
+            else if (node.type == 'Identifier')
+                node._scope = scope
+                identifiers.push(node)
+            else if (node :: Array)
+                visit array (node, scope)
+            else if (node :: Object)
+                visit object (node, scope)
 
     visit array (node, scope) =
         for each @(item) in (node)
@@ -75,19 +73,8 @@ rewrite (identifier, dsl name) =
     }
     delete (identifier.name)
 
-scope under (node, parent scope) =
+add function arguments (node, parent scope) =
     if (node.type == 'FunctionExpression')
-        new scope = {}
-        for each @(key) in (Object.keys(parent scope))
-            new scope.(key) = parent scope.(key)
-
         param names = param names in (node)
         for each @(name) in (param names)
-            new scope.(name) = true
-
-        new scope
-    else
-        parent scope
-
-variable names in (declarations) =
-    [d.id.name, where: d <- declarations]
+            parent scope.(name) = true
