@@ -102,6 +102,23 @@ describe 'dslify'
                 bar = 1
                 { a = bar }
 
+    it 'rewrites global accessors in nested scopes'
+        fn (x) =
+            a (y) =
+                b (z)
+                fn (o) = p (o)
+                fn (x)
+
+            a 123
+
+        (fn) rewrites as @(_dsl, x)
+            a (y) =
+                _dsl.b (_dsl.z)
+                fn (o) = _dsl.p (o)
+                fn (x)
+
+            a 123
+
     it 'preserves nested function parameters'
         fn (x) =
             foo (a, b) @(c, d)
