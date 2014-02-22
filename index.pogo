@@ -14,7 +14,7 @@ transform (func, dsl name: '_dsl', as string: false) =
 
 transform module (js string, dsl name: '_dsl') =
     function wrapper = "function(#(dsl name)) { return #(js string) }"
-    transform (function wrapper, as string: true)
+    transform (function wrapper, dsl name: dsl name, as string: true)
 
 exports.transform = transform
 exports.transform module = transform module

@@ -25,6 +25,7 @@
         var functionWrapper;
         functionWrapper = "function(" + dslName + ") { return " + jsString + " }";
         return transform(functionWrapper, {
+            dslName: dslName,
             asString: true
         });
     };

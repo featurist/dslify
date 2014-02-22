@@ -132,15 +132,27 @@ describe 'dslify'
                 _dsl.bar (c) @(x)
                     c + x
 
-    it 'can rewrite a whole module'
+    describe 'rewriting modules'
+
         fs = require 'fs'
         pogo = require 'pogo'
         pogo module = fs.read file sync './test/example_module.pogo' 'utf-8'
         js module = pogo.compile (pogo module, in scope: false)
-        transformed = dslify.transform module (js module)
-        expected (_dsl) =
-            _dsl.component {
-                render () = _dsl.div('Seconds Elapsed: ' + this.state.secondsElapsed)
-            }
 
-        normalise (transformed).should.equal (normalise (expected))
+        it 'rewrites the module module wrapped in a function'
+            transformed = dslify.transform module (js module)
+            expected (_dsl) =
+                _dsl.component {
+                    render () = _dsl.div('Seconds Elapsed: ' + this.state.secondsElapsed)
+                }
+
+            normalise (transformed).should.equal (normalise (expected))
+
+        it 'can rewrite a whole module, with a custom dsl name'
+            transformed = dslify.transform module (js module, dsl name: 'foo')
+            expected (foo) =
+                foo.component {
+                    render () = foo.div('Seconds Elapsed: ' + this.state.secondsElapsed)
+                }
+
+            normalise (transformed).should.equal (normalise (expected))
