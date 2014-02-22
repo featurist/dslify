@@ -12,9 +12,13 @@ transform (func, dsl name: '_dsl', as string: false) =
         js = escodegen.generate(func expression.body).replace(r/(^\s*\{|\}\s*$)/g, '')
         Function.apply(null, [dsl name].concat(params).concat(js))
 
-transform module (js string, dsl name: '_dsl') =
-    function wrapper = "function(#(dsl name)) { return #(js string) }"
-    transform (function wrapper, dsl name: dsl name, as string: true)
+transform module (js string, dsl name: '_dsl', as string: false) =
+    function wrapper = if (as string)
+        "function(#(dsl name)) { return #(js string) }"
+    else
+        "function() { return #(js string) }"
+
+    transform (function wrapper, dsl name: dsl name, as string: as string)
 
 exports.transform = transform
 exports.transform module = transform module
@@ -57,7 +61,6 @@ identifiers under (node) =
 
     scope = {}
     identifiers = []
-    variables = []
     visit (node, scope)
     identifiers
 

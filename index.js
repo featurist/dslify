@@ -20,13 +20,20 @@
         }
     };
     transformModule = function(jsString, gen2_options) {
-        var dslName;
+        var dslName, asString;
         dslName = gen2_options !== void 0 && Object.prototype.hasOwnProperty.call(gen2_options, "dslName") && gen2_options.dslName !== void 0 ? gen2_options.dslName : "_dsl";
+        asString = gen2_options !== void 0 && Object.prototype.hasOwnProperty.call(gen2_options, "asString") && gen2_options.asString !== void 0 ? gen2_options.asString : false;
         var functionWrapper;
-        functionWrapper = "function(" + dslName + ") { return " + jsString + " }";
+        functionWrapper = function() {
+            if (asString) {
+                return "function(" + dslName + ") { return " + jsString + " }";
+            } else {
+                return "function() { return " + jsString + " }";
+            }
+        }();
         return transform(functionWrapper, {
             dslName: dslName,
-            asString: true
+            asString: asString
         });
     };
     exports.transform = transform;
@@ -54,7 +61,7 @@
         return void 0;
     };
     identifiersUnder = function(node) {
-        var visit, visitArray, visitObject, scope, identifiers, variables;
+        var visit, visitArray, visitObject, scope, identifiers;
         visit = function(node, scope) {
             if (!node || node === "VariableDeclaration") {
                 return;
@@ -96,7 +103,6 @@
         };
         scope = {};
         identifiers = [];
-        variables = [];
         visit(node, scope);
         return identifiers;
     };

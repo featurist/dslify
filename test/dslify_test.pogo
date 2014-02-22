@@ -132,7 +132,7 @@ describe 'dslify'
                 _dsl.bar (c) @(x)
                     c + x
 
-    describe 'rewriting modules'
+    describe 'transform module ()'
 
         fs = require 'fs'
         pogo = require 'pogo'
@@ -141,6 +141,17 @@ describe 'dslify'
 
         it 'rewrites the module module wrapped in a function'
             transformed = dslify.transform module (js module)
+            (transformed :: Function).should.be.true
+            expected (_dsl) =
+                _dsl.component {
+                    render () = _dsl.div('Seconds Elapsed: ' + this.state.secondsElapsed)
+                }
+
+            normalise (transformed).should.equal (normalise (expected))
+
+        it 'rewrites the module module wrapped in a function, as a string'
+            transformed = dslify.transform module (js module, as string: true)
+            (transformed :: String).should.be.true
             expected (_dsl) =
                 _dsl.component {
                     render () = _dsl.div('Seconds Elapsed: ' + this.state.secondsElapsed)
