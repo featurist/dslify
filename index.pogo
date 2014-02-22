@@ -12,7 +12,12 @@ transform (func, dsl name: '_dsl', as string: false) =
         js = escodegen.generate(func expression.body).replace(r/(^\s*\{|\}\s*$)/g, '')
         Function.apply(null, [dsl name].concat(params).concat(js))
 
+transform module (js string, dsl name: '_dsl') =
+    function wrapper = "function(#(dsl name)) { return #(js string) }"
+    transform (function wrapper, as string: true)
+
 exports.transform = transform
+exports.transform module = transform module
 
 param names in (func expression) =
     [p.name, where: p <- func expression.params]
@@ -24,7 +29,7 @@ rewrite identifiers under (node, dsl name) =
 
 identifiers under (node) =
     visit (node, scope) =
-        if (!node || node.type == 'Property' || node == 'VariableDeclaration')
+        if (!node || node == 'VariableDeclaration')
             return
         else
             add function arguments(node, scope)
@@ -34,6 +39,8 @@ identifiers under (node) =
             else if (node.type == 'Identifier')
                 node._scope = scope
                 identifiers.push(node)
+            else if (node.type == 'Property')
+                visit (node.value, scope)
             else if (node :: Array)
                 visit array (node, scope)
             else if (node :: Object)

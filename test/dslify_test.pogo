@@ -131,3 +131,16 @@ describe 'dslify'
                 x.bar(_dsl.baz(_dsl.a, _dsl.b, c, d))
                 _dsl.bar (c) @(x)
                     c + x
+
+    it 'can rewrite a whole module'
+        fs = require 'fs'
+        pogo = require 'pogo'
+        pogo module = fs.read file sync './test/example_module.pogo' 'utf-8'
+        js module = pogo.compile (pogo module, in scope: false)
+        transformed = dslify.transform module (js module)
+        expected (_dsl) =
+            _dsl.component {
+                render () = _dsl.div('Seconds Elapsed: ' + this.state.secondsElapsed)
+            }
+
+        normalise (transformed).should.equal (normalise (expected))
