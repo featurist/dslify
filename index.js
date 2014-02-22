@@ -55,24 +55,37 @@
         return void 0;
     };
     identifiersUnder = function(node) {
-        var visit, visitArray, visitObject, scope, identifiers;
+        var visit, typeVisitors, visitNode, visitArray, visitObject, scope, identifiers;
         visit = function(node, scope) {
-            if (!node || node === "VariableDeclaration") {
-                return;
-            } else {
-                addFunctionArguments(node, scope);
-                if (node.type === "VariableDeclarator") {
-                    return scope[node.id.name] = true;
-                } else if (node.type === "Identifier") {
-                    node._scope = scope;
-                    return identifiers.push(node);
-                } else if (node.type === "Property") {
-                    return visit(node.value, scope);
-                } else if (node instanceof Array) {
-                    return visitArray(node, scope);
-                } else if (node instanceof Object) {
-                    return visitObject(node, scope);
-                }
+            if (node) {
+                return visitNode(node, scope);
+            }
+        };
+        typeVisitors = {
+            VariableDeclarator: function(node) {
+                var self = this;
+                return scope[node.id.name] = true;
+            },
+            Identifier: function(node) {
+                var self = this;
+                node._scope = scope;
+                return identifiers.push(node);
+            },
+            Property: function(node) {
+                var self = this;
+                return visit(node.value, scope);
+            }
+        };
+        visitNode = function(node, scope) {
+            var typeVisitor;
+            addFunctionArguments(node, scope);
+            typeVisitor = typeVisitors[node.type];
+            if (typeVisitor) {
+                return typeVisitor(node);
+            } else if (node instanceof Array) {
+                return visitArray(node, scope);
+            } else if (node instanceof Object) {
+                return visitObject(node, scope);
             }
         };
         visitArray = function(node, scope) {
@@ -100,24 +113,24 @@
         visit(node, scope);
         return identifiers;
     };
-    rewrite = function(identifier, dslName) {
+    rewrite = function(id, dslName) {
         var scope;
-        scope = identifier._scope;
-        delete identifier._scope;
-        if (scope[identifier.name] || identifier.name === "module" || identifier.name === "arguments") {
+        scope = id._scope;
+        delete id._scope;
+        if (scope[id.name] || id.name === "module" || id.name === "arguments") {
             return;
         }
-        identifier.type = "MemberExpression";
-        identifier.computed = false;
-        identifier.object = {
+        id.type = "MemberExpression";
+        id.computed = false;
+        id.object = {
             type: "Identifier",
             name: dslName
         };
-        identifier.property = {
+        id.property = {
             type: "Identifier",
-            name: identifier.name
+            name: id.name
         };
-        return delete identifier.name;
+        return delete id.name;
     };
     addFunctionArguments = function(node, parentScope) {
         var paramNames, gen10_items, gen11_i, name;

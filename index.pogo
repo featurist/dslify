@@ -30,22 +30,34 @@ rewrite identifiers under (node, dsl name) =
 
 identifiers under (node) =
     visit (node, scope) =
-        if (!node || node == 'VariableDeclaration')
-            return
-        else
-            add function arguments(node, scope)
+        if (node)
+            visit node (node, scope)
 
-            if (node.type == 'VariableDeclarator')
-                scope.(node.id.name) = true
-            else if (node.type == 'Identifier')
-                node._scope = scope
-                identifiers.push(node)
-            else if (node.type == 'Property')
-                visit (node.value, scope)
-            else if (node :: Array)
-                visit array (node, scope)
-            else if (node :: Object)
-                visit object (node, scope)
+    type visitors = {
+
+        VariableDeclarator (node) =
+            scope.(node.id.name) = true
+
+        Identifier (node) =
+            node._scope = scope
+            identifiers.push(node)
+
+        Property (node) =
+             visit (node.value, scope)
+
+    }
+
+    visit node (node, scope) =
+        add function arguments(node, scope)
+
+        type visitor = type visitors.(node.type)
+
+        if (type visitor)
+            type visitor (node)
+        else if (node :: Array)
+            visit array (node, scope)
+        else if (node :: Object)
+            visit object (node, scope)
 
     visit array (node, scope) =
         for each @(item) in (node)
@@ -61,24 +73,24 @@ identifiers under (node) =
     visit (node, scope)
     identifiers
 
-rewrite (identifier, dsl name) =
-    scope = identifier._scope
-    delete (identifier._scope)
+rewrite (id, dsl name) =
+    scope = id._scope
+    delete (id._scope)
 
-    if (scope.(identifier.name) || (identifier.name == 'module' || identifier.name == 'arguments'))
+    if (scope.(id.name) || (id.name == 'module' || id.name == 'arguments'))
         return
 
-    identifier.type = 'MemberExpression'
-    identifier.computed = false
-    identifier.object = {
+    id.type = 'MemberExpression'
+    id.computed = false
+    id.object = {
         type = 'Identifier'
         name = dsl name
     }
-    identifier.property = {
+    id.property = {
         type = 'Identifier'
-        name = identifier.name
+        name = id.name
     }
-    delete (identifier.name)
+    delete (id.name)
 
 add function arguments (node, parent scope) =
     if (node.type == 'FunctionExpression')
