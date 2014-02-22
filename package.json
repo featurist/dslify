@@ -1,19 +1,22 @@
 {
   "name": "dslify",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Rewrites functions or modules in terms of a DSL",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "escodegen": "~1.0.1",
-    "esprima": "~1.0.4"
+    "escodegen": "~1.2.0",
+    "esprima": "~1.0.4",
+    "should": "~3.1.2",
+    "mocha": "~1.17.1",
+    "pogo": "~0.6.5"
   },
   "devDependencies": {
-    "mocha": "~1.16.2",
-    "should": "~2.1.1",
-    "pogo": "~0.6.4"
+    "mocha": "~1.17.1",
+    "should": "~3.1.2",
+    "pogo": "~0.6.5"
   },
   "scripts": {
     "test": "make test"
