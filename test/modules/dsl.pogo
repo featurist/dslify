@@ -4,6 +4,8 @@ module.exports = {
 
         tell the time () = "1999"
 
+        tell the time async! = "soon"
+
     }
 
 }

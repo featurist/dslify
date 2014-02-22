@@ -131,3 +131,12 @@ describe 'dslify'
                 x.bar(_dsl.baz(_dsl.a, _dsl.b, c, d))
                 _dsl.bar (c) @(x)
                     c + x
+
+    it 'does not rewrite function arguments'
+        fn (x) =
+            foo (arguments)
+                bar (arguments, x)
+
+        (fn) rewrites as @(_dsl, x)
+            _dsl.foo (arguments)
+                _dsl.bar (arguments, x)

@@ -104,7 +104,7 @@
         var scope;
         scope = identifier._scope;
         delete identifier._scope;
-        if (scope[identifier.name] || identifier.name === "module") {
+        if (scope[identifier.name] || identifier.name === "module" || identifier.name === "arguments") {
             return;
         }
         identifier.type = "MemberExpression";
