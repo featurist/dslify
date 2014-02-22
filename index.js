@@ -19,22 +19,16 @@
             return Function.apply(null, [ dslName ].concat(params).concat(js));
         }
     };
-    transformModule = function(jsString, gen2_options) {
-        var dslName, asString;
+    transformModule = function(jsString, dslModulePath, gen2_options) {
+        var dslName;
         dslName = gen2_options !== void 0 && Object.prototype.hasOwnProperty.call(gen2_options, "dslName") && gen2_options.dslName !== void 0 ? gen2_options.dslName : "_dsl";
-        asString = gen2_options !== void 0 && Object.prototype.hasOwnProperty.call(gen2_options, "asString") && gen2_options.asString !== void 0 ? gen2_options.asString : false;
-        var functionWrapper;
-        functionWrapper = function() {
-            if (asString) {
-                return "function(" + dslName + ") { return " + jsString + " }";
-            } else {
-                return "function() { return " + jsString + " }";
-            }
-        }();
-        return transform(functionWrapper, {
+        var functionWrapper, transformed;
+        functionWrapper = "function(" + dslName + ") { " + jsString + " }";
+        transformed = transform(functionWrapper, {
             dslName: dslName,
-            asString: asString
-        });
+            asString: true
+        }).toString();
+        return "(" + transformed + ")(require('" + dslModulePath + "'))";
     };
     exports.transform = transform;
     exports.transformModule = transformModule;
@@ -110,7 +104,7 @@
         var scope;
         scope = identifier._scope;
         delete identifier._scope;
-        if (scope[identifier.name]) {
+        if (scope[identifier.name] || identifier.name === "module") {
             return;
         }
         identifier.type = "MemberExpression";

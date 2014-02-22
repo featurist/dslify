@@ -12,13 +12,10 @@ transform (func, dsl name: '_dsl', as string: false) =
         js = escodegen.generate(func expression.body).replace(r/(^\s*\{|\}\s*$)/g, '')
         Function.apply(null, [dsl name].concat(params).concat(js))
 
-transform module (js string, dsl name: '_dsl', as string: false) =
-    function wrapper = if (as string)
-        "function(#(dsl name)) { return #(js string) }"
-    else
-        "function() { return #(js string) }"
-
-    transform (function wrapper, dsl name: dsl name, as string: as string)
+transform module (js string, dsl module path, dsl name: '_dsl') =
+    function wrapper = "function(#(dsl name)) { #(js string) }"
+    transformed = transform (function wrapper, dsl name: dsl name, as string: true).to string()
+    "(#(transformed))(require('#(dsl module path)'))"
 
 exports.transform = transform
 exports.transform module = transform module
@@ -68,7 +65,7 @@ rewrite (identifier, dsl name) =
     scope = identifier._scope
     delete (identifier._scope)
 
-    if (scope.(identifier.name))
+    if (scope.(identifier.name) || (identifier.name == 'module'))
         return
 
     identifier.type = 'MemberExpression'
