@@ -1,6 +1,6 @@
 # dslify
 
-Rewrites a JavaScript function, such that any global property access is transformed to call a member of a new _dsl_ argument. Use dslify to interpret domain-specific languages without messing about in global scope.
+Rewrites a JavaScript function or module, such that any global property access is transformed to call a member of a new _dsl_ argument. Use dslify to interpret domain-specific languages without messing about in global scope.
 
 [![Build Status](https://secure.travis-ci.org/featurist/dslify.png?branch=master)](http://travis-ci.org/featurist/dslify)
 
@@ -10,7 +10,7 @@ Rewrites a JavaScript function, such that any global property access is transfor
 
     npm install dslify
 
-### Example
+### Rewriting Functions
 
     var dslify = require('dslify');
 
@@ -25,8 +25,6 @@ Rewrites a JavaScript function, such that any global property access is transfor
     };
     shouter(dsl); // unicorns!!
 
-### Strings Example
-
 Sometimes you might want to operate with strings instead of JavaScript functions. For
 example if you are generating templates or want to send JavaScript to the client.
 
@@ -37,8 +35,37 @@ example if you are generating templates or want to send JavaScript to the client
 
     output // function(input) { return shout(input, _dsl.globalValue); };
 
+
+### Rewriting Modules
+
+By rewriting an entire module in terms of another 'dsl' interpreter module, you can make slightly larger DSLs:
+
+    // abstract.js
+    module.exports = {
+      log: function(message) {
+        print(message);
+      }
+    };
+
+    // printer.js
+    module.exports = {
+      print: function(message) {
+        console.log(message + '!')
+      }
+    };
+
+    // compile.js
+    var dslify = require('dslify');
+    var abstract = require('fs').readFileSync('./abstract.js', 'utf-8');
+    var concrete = dslify.transformModule(abstract, './printer');
+    fs.writeFileSync('./concrete.js', concrete);
+
+    // then...
+    var concrete = require('./concrete.js');
+    concrete.log('jibber jabber'); // -> jibber jabber!
+
 ### How?
-dslify parses functions using [esprima](https://github.com/ariya/esprima), rewriting them as new functions using  [escodegen](https://github.com/Constellation/escodegen).
+dslify parses JavaScript using [esprima](https://github.com/ariya/esprima), rewriting it as new JavaScript using  [escodegen](https://github.com/Constellation/escodegen).
 
 ### Hold on, isn't this just a long-winded JavaScript 'with'?
 Yes. But 'with' is [leaky and dangerous](http://www.yuiblog.com/blog/2006/04/11/with-statement-considered-harmful/), wheras dslify is like a sandbox because it rewrites access to global scope, e.g:
