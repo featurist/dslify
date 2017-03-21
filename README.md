@@ -1,6 +1,6 @@
 # dslify
 
-Rewrites a JavaScript function or module, such that any global property access is transformed to call a member of a new _dsl_ argument. Use dslify to interpret domain-specific languages without messing about in global scope.
+Rewrites a JavaScript function or module, such that any global property access is transformed to call a member of a new _dsl_ argument. Use dslify to interpret domain-specific languages without messing around in global scope.
 
 [![Build Status](https://secure.travis-ci.org/featurist/dslify.png?branch=master)](http://travis-ci.org/featurist/dslify)
 
