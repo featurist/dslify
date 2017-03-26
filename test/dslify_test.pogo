@@ -106,7 +106,7 @@ describe 'dslify'
         fn (x) =
             a (y) =
                 b (z)
-                fn (o) = p (o)
+                p (o)
                 fn (x)
 
             a 123
@@ -114,8 +114,8 @@ describe 'dslify'
         (fn) rewrites as @(_dsl, x)
             a (y) =
                 _dsl.b (_dsl.z)
-                fn (o) = _dsl.p (o)
-                fn (x)
+                _dsl.p (_dsl.o)
+                _dsl.fn (x)
 
             a 123
 

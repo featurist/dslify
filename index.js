@@ -117,7 +117,7 @@
         var scope;
         scope = id._scope;
         delete id._scope;
-        if (scope[id.name] || id.name === "module" || id.name === "arguments") {
+        if (scope[id.name] || (id.name === "module" || id.name === "arguments")) {
             return;
         }
         id.type = "MemberExpression";

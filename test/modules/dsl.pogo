@@ -8,4 +8,6 @@ module.exports = {
 
     }
 
+    Promise = Promise
+
 }
