@@ -21,7 +21,7 @@ var script = function() {
   return addHorn(addLegs(makeAnimal()))
 }
 
-var shouter = dslify.transform(fn)
+var factory = dslify.transform(script)
 
 var dsl = {
   makeAnimal() {
