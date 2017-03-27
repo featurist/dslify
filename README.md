@@ -15,29 +15,29 @@ domain-specific languages without messing around in global scope.
 ### Rewriting Functions
 
 ```js
-  var dslify = require('dslify')
+var dslify = require('dslify')
 
-  var script = function() {
-    return addHorn(addLegs(makeAnimal()))
+var script = function() {
+  return addHorn(addLegs(makeAnimal()))
+}
+
+var shouter = dslify.transform(fn)
+
+var dsl = {
+  makeAnimal() {
+    return {}
+  },
+  addLegs(animal) {
+    animal.legs = 4
+    return animal
+  },
+  addHorn(animal) {
+    animal.horns = 1
+    return animal
   }
+}
 
-  var shouter = dslify.transform(fn)
-
-  var dsl = {
-    makeAnimal() {
-      return {}
-    },
-    addLegs(animal) {
-      animal.legs = 4
-      return animal
-    },
-    addHorn(animal) {
-      animal.horns = 1
-      return animal
-    }
-  }
-
-  factory(dsl) // => { legs: 4, horns: 1 }
+factory(dsl) // => { legs: 4, horns: 1 }
 ```
 
 Sometimes you might want to operate with strings instead of JavaScript functions. For
